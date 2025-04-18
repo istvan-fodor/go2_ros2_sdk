@@ -449,59 +449,65 @@ class RobotBaseNode(Node):
     def publish_odom_webrtc(self):
         for i in range(len(self.robot_odom)):
             if self.robot_odom[str(i)]:
-                odom_trans = TransformStamped()
-                odom_trans.header.stamp = self.get_clock().now().to_msg()
-                odom_trans.header.frame_id = 'odom'
+                try:
+                    odom_trans = TransformStamped()
+                    odom_trans.header.stamp = self.get_clock().now().to_msg()
+                    odom_trans.header.frame_id = 'odom'
 
-                if self.conn_mode == 'single':
-                    odom_trans.child_frame_id = "base_link"
-                else:
-                    odom_trans.child_frame_id = f"robot{str(i)}/base_link"
+                    if self.conn_mode == 'single':
+                        odom_trans.child_frame_id = "base_link"
+                    else:
+                        odom_trans.child_frame_id = f"robot{str(i)}/base_link"
 
-                odom_trans.transform.translation.x = self.robot_odom[str(
-                    i)]['data']['pose']['position']['x']
-                odom_trans.transform.translation.y = self.robot_odom[str(
-                    i)]['data']['pose']['position']['y']
-                odom_trans.transform.translation.z = self.robot_odom[str(
-                    i)]['data']['pose']['position']['z'] + 0.07
-                odom_trans.transform.rotation.x = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['x']
-                odom_trans.transform.rotation.y = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['y']
-                odom_trans.transform.rotation.z = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['z']
-                odom_trans.transform.rotation.w = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['w']
-                self.broadcaster.sendTransform(odom_trans)
+                    odom_trans.transform.translation.x = self.robot_odom[str(
+                        i)]['data']['pose']['position']['x']
+                    odom_trans.transform.translation.y = self.robot_odom[str(
+                        i)]['data']['pose']['position']['y']
+                    odom_trans.transform.translation.z = self.robot_odom[str(
+                        i)]['data']['pose']['position']['z'] + 0.07
+                    odom_trans.transform.rotation.x = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['x']
+                    odom_trans.transform.rotation.y = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['y']
+                    odom_trans.transform.rotation.z = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['z']
+                    odom_trans.transform.rotation.w = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['w']
+                    self.broadcaster.sendTransform(odom_trans)
+                except Exception as e:
+                    self.get_logger().error(f"Error in publish_odom_webrtc: {e}")
 
     def publish_odom_topic_webrtc(self):
         for i in range(len(self.robot_odom)):
             if self.robot_odom[str(i)]:
-                odom_msg = Odometry()
-                odom_msg.header.stamp = self.get_clock().now().to_msg()
-                odom_msg.header.frame_id = 'odom'
+                try:
+                    odom_msg = Odometry()
+                    odom_msg.header.stamp = self.get_clock().now().to_msg()
+                    odom_msg.header.frame_id = 'odom'
 
-                if self.conn_mode == 'single':
-                    odom_msg.child_frame_id = "base_link"
+                    if self.conn_mode == 'single':
+                        odom_msg.child_frame_id = "base_link"
 
-                else:
-                    odom_msg.child_frame_id = f"robot{str(i)}/base_link"
+                    else:
+                        odom_msg.child_frame_id = f"robot{str(i)}/base_link"
 
-                odom_msg.pose.pose.position.x = self.robot_odom[str(
-                    i)]['data']['pose']['position']['x']
-                odom_msg.pose.pose.position.y = self.robot_odom[str(
-                    i)]['data']['pose']['position']['y']
-                odom_msg.pose.pose.position.z = self.robot_odom[str(
-                    i)]['data']['pose']['position']['z'] + 0.07
-                odom_msg.pose.pose.orientation.x = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['x']
-                odom_msg.pose.pose.orientation.y = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['y']
-                odom_msg.pose.pose.orientation.z = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['z']
-                odom_msg.pose.pose.orientation.w = self.robot_odom[str(
-                    i)]['data']['pose']['orientation']['w']
-                self.go2_odometry_pub[i].publish(odom_msg)
+                    odom_msg.pose.pose.position.x = self.robot_odom[str(
+                        i)]['data']['pose']['position']['x']
+                    odom_msg.pose.pose.position.y = self.robot_odom[str(
+                        i)]['data']['pose']['position']['y']
+                    odom_msg.pose.pose.position.z = self.robot_odom[str(
+                        i)]['data']['pose']['position']['z'] + 0.07
+                    odom_msg.pose.pose.orientation.x = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['x']
+                    odom_msg.pose.pose.orientation.y = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['y']
+                    odom_msg.pose.pose.orientation.z = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['z']
+                    odom_msg.pose.pose.orientation.w = self.robot_odom[str(
+                        i)]['data']['pose']['orientation']['w']
+                    self.go2_odometry_pub[i].publish(odom_msg)
+                except Exception as e:
+                    self.get_logger().error(f"Error in publish_odom_webrtc: {e}")
 
     def publish_lidar_webrtc(self):
         for i in range(len(self.robot_lidar)):
@@ -557,6 +563,13 @@ class RobotBaseNode(Node):
             if self.robot_sport_state[str(i)]:
                 joint_state = JointState()
                 joint_state.header.stamp = self.get_clock().now().to_msg()
+
+
+                # if joint_state has 0s, in foot_position_body, then this is AI mode
+                #if self.robot_sport_state[str(i)]["data"]["foot_position_body"][0]:
+                if not all(isinstance(x, float) for x in self.robot_sport_state[str(
+                        i)]["data"]["foot_position_body"]):
+                    return
 
                 fl_foot_pos_array = [
                     self.robot_sport_state[str(
@@ -635,14 +648,17 @@ class RobotBaseNode(Node):
                         f'robot{str(i)}/RR_hip_joint',
                         f'robot{str(i)}/RR_thigh_joint',
                         f'robot{str(i)}/RR_calf_joint']
-
-                joint_state.position = [
-                    FL_hip_joint, FL_thigh_joint, FL_calf_joint,
-                    FR_hip_joint, FR_thigh_joint, FR_calf_joint,
-                    RL_hip_joint, RL_thigh_joint, RL_calf_joint,
-                    RR_hip_joint, RR_thigh_joint, RR_calf_joint,
-                ]
-                self.joint_pub[i].publish(joint_state)
+                    
+                try:
+                    joint_state.position = [
+                        FL_hip_joint, FL_thigh_joint, FL_calf_joint,
+                        FR_hip_joint, FR_thigh_joint, FR_calf_joint,
+                        RL_hip_joint, RL_thigh_joint, RL_calf_joint,
+                        RR_hip_joint, RR_thigh_joint, RR_calf_joint,
+                    ]
+                    self.joint_pub[i].publish(joint_state)
+                except Exception as e:
+                    self.get_logger().error(f"Error in publish_joint_state_webrtc: {e}")
 
     def publish_webrtc_commands(self, robot_num):
         while True:
@@ -668,8 +684,8 @@ class RobotBaseNode(Node):
                     map(float, self.robot_sport_state[str(i)]["data"]["position"]))
                 go2_state.body_height = float(
                     self.robot_sport_state[str(i)]["data"]["body_height"])
-                go2_state.velocity = self.robot_sport_state[str(
-                    i)]["data"]["velocity"]
+                go2_state.velocity = list(map(float, self.robot_sport_state[str(
+                    i)]["data"]["velocity"]))
                 go2_state.range_obstacle = list(
                     map(float, self.robot_sport_state[str(i)]["data"]["range_obstacle"]))
                 go2_state.foot_force = self.robot_sport_state[str(
